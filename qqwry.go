@@ -22,7 +22,8 @@ package qqwry
 
 import (
 	"bytes"
-	"code.google.com/p/mahonia"
+	//"code.google.com/p/mahonia"
+	"github.com/axgle/mahonia"
 	"encoding/binary"
 	"fmt"
 	"net"
