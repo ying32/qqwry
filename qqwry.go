@@ -23,9 +23,9 @@ package qqwry
 import (
 	"bytes"
 	//"code.google.com/p/mahonia"
-	"github.com/axgle/mahonia"
 	"encoding/binary"
 	"fmt"
+	"github.com/axgle/mahonia"
 	"net"
 	"os"
 )
@@ -88,10 +88,7 @@ func (self *QQWry) dataReaderPosition() int64 {
 // AnsiToUtf8的转换
 func (self *QQWry) ansiToUtf8(bytes []byte) string {
 	decoder := mahonia.NewDecoder("gbk")
-	if res, ok := decoder.ConvertStringOK(string(bytes)); ok {
-		return res
-	}
-	return ""
+	return decoder.ConvertString(string(bytes))
 }
 
 // 字符串ip转整型
