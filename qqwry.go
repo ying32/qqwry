@@ -66,14 +66,14 @@ func (self *QQWry) Version() string {
 	if self.RecordCount > 0 {
 		offset, _, _ := self.getIPOffset(self.RecordCount, 1)
 		if offset > 0 {
-			return self.getIpLocationOfOffset(offset)
+			return self.getIpLocationOf(offset)
 		}
 	}
 	return "未知区域"
 }
 
 // 读取一个3字节并转为整数
-func (self *QQWry) read3byteuint64() int64 {
+func (self *QQWry) read3byteint() int64 {
 	temp := make([]byte, 3)
 	dataReader.Read(temp)
 	return int64(uint32(temp[0]) | uint32(temp[1])<<8 | uint32(temp[2])<<16)
@@ -113,7 +113,7 @@ func (self *QQWry) getIPOffset(recNum uint32, flag int) (int64, uint32, uint32) 
 	dataReader.Seek(result, 0)
 	binary.Read(dataReader, binary.LittleEndian, &begin)
 	if flag == 1 {
-		result = self.read3byteuint64()
+		result = self.read3byteint()
 		dataReader.Seek(result, 0)
 		binary.Read(dataReader, binary.LittleEndian, &end)
 	}
@@ -121,23 +121,23 @@ func (self *QQWry) getIPOffset(recNum uint32, flag int) (int64, uint32, uint32) 
 }
 
 // 读取区域信息
-func (self *QQWry) readAreaStrOfOffset(offset int64) string {
+func (self *QQWry) readAreaStrOf(offset int64) string {
 	dataReader.Seek(offset, 0)
 	b, _ := dataReader.ReadByte()
 	if b == REDIRECT_MODE_1 || b == REDIRECT_MODE_2 {
 		dataReader.Seek(offset+1, 0)
-		AreaOffset := self.read3byteuint64()
+		AreaOffset := self.read3byteint()
 		if AreaOffset != 0 {
-			return self.readStrOfOffset(AreaOffset)
+			return self.readStrOf(AreaOffset)
 		}
 	} else {
-		return self.readStrOfOffset(offset)
+		return self.readStrOf(offset)
 	}
 	return "未知区域"
 }
 
 // 读指定位置的字符串
-func (self *QQWry) readStrOfOffset(offset int64) string {
+func (self *QQWry) readStrOf(offset int64) string {
 	dataReader.Seek(offset, 0)
 	strbytes := make([]byte, 0) // 字节数组
 	b, _ := dataReader.ReadByte()
@@ -149,31 +149,31 @@ func (self *QQWry) readStrOfOffset(offset int64) string {
 }
 
 // 读取指定位置ip的归属字符串
-func (self *QQWry) getIpLocationOfOffset(offset int64) string {
+func (self *QQWry) getIpLocationOf(offset int64) string {
 	dataReader.Seek(offset+4, 0)
 	var CountryName, AreaName string
 	b, _ := dataReader.ReadByte()
 
 	switch b {
 	case REDIRECT_MODE_1:
-		Countryoffset := self.read3byteuint64()
+		Countryoffset := self.read3byteint()
 		dataReader.Seek(Countryoffset, 0)
 		b, _ := dataReader.ReadByte()
 		if b == REDIRECT_MODE_2 {
-			CountryName = self.readStrOfOffset(self.read3byteuint64())
+			CountryName = self.readStrOf(self.read3byteint())
 			dataReader.Seek(Countryoffset+4, 0)
 		} else {
-			CountryName = self.readStrOfOffset(Countryoffset)
+			CountryName = self.readStrOf(Countryoffset)
 		}
-		AreaName = self.readAreaStrOfOffset(self.dataReaderPosition())
+		AreaName = self.readAreaStrOf(self.dataReaderPosition())
 
 	case REDIRECT_MODE_2:
-		CountryName = self.readStrOfOffset(self.read3byteuint64())
-		AreaName = self.readAreaStrOfOffset(offset + 8)
+		CountryName = self.readStrOf(self.read3byteint())
+		AreaName = self.readAreaStrOf(offset + 8)
 
 	default:
-		CountryName = self.readStrOfOffset(self.dataReaderPosition() - 1)
-		AreaName = self.readAreaStrOfOffset(self.dataReaderPosition())
+		CountryName = self.readStrOf(self.dataReaderPosition() - 1)
+		AreaName = self.readAreaStrOf(self.dataReaderPosition())
 
 	}
 	return CountryName + AreaName
@@ -200,7 +200,7 @@ func (self *QQWry) GetIPLocation(ip uint32) string {
 	}
 	offset, beginIP, endIP := self.getIPOffset(max, 1)
 	if beginIP <= ip && endIP >= ip {
-		return self.getIpLocationOfOffset(offset)
+		return self.getIpLocationOf(offset)
 	}
 	return "***友情提示，未知IP***"
 }
