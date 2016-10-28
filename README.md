@@ -11,7 +11,7 @@ by:ying32   2016/5/13
 [纯真IP数据格式](http://lumaqq.linuxsir.org/article/qqwry_format_detail.html "纯真IP数据格式")
 
 #### golang使用例程
-```golang  
+```go
 import (
 	"fmt"
 	"github.com/ying32/qqwry"
